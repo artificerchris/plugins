@@ -92,6 +92,14 @@ static NSString *const PLATFORM_CHANNEL = @"plugins.flutter.io/share";
 @end
 
 @implementation FLTSharePlugin
++ (UIViewController*) topMostController {
+    NSArray<UIWindow*> *windows = [UIApplication sharedApplication].windows;
+    UIViewController *controller = [[[windows filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id window, NSDictionary *bindings) {
+        return [[window rootViewController] isKindOfClass: [FlutterViewController class]];
+    }]] firstObject] rootViewController];
+ 
+    return controller;
+}
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
   FlutterMethodChannel *shareChannel =
@@ -124,7 +132,7 @@ static NSString *const PLATFORM_CHANNEL = @"plugins.flutter.io/share";
 
       [self shareText:shareText
                  subject:shareSubject
-          withController:[UIApplication sharedApplication].keyWindow.rootViewController
+          withController:[self topMostController]
                 atSource:originRect];
       result(nil);
     } else if ([@"shareFiles" isEqualToString:call.method]) {
@@ -153,7 +161,7 @@ static NSString *const PLATFORM_CHANNEL = @"plugins.flutter.io/share";
             withMimeType:mimeTypes
              withSubject:subject
                 withText:text
-          withController:[UIApplication sharedApplication].keyWindow.rootViewController
+          withController:[self topMostController]
                 atSource:originRect];
       result(nil);
     } else {
